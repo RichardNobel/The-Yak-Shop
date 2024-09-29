@@ -1,5 +1,7 @@
 using System.Net;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using YakShop.Server.Data;
 using YakShop.Server.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,6 +11,14 @@ builder.Services.Configure<RouteHandlerOptions>(options => options.ThrowOnBadReq
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddDbContext<YakShopDb>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("TheYakShop"))
+);
+
+#if DEBUG
+builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+#endif
 
 var app = builder.Build();
 
