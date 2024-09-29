@@ -1,6 +1,6 @@
 @YakShop.Server_HostAddress = http://localhost:5204
 
-GET {{YakShop.Server_HostAddress}}/weatherforecast/
+GET {{YakShop.Server_HostAddress}}/yak/
 Accept: application/json
 
 ###
