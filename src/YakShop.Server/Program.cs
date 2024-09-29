@@ -32,7 +32,7 @@ app.MapGet(
         "/yak-shop/herd/{daysAfterInit}",
         ([FromRoute] int daysAfterInit) =>
         {
-            return Results.Ok();
+            return TypedResults.Ok();
         }
     )
     .WithName("GetHerdInfo")
@@ -44,7 +44,7 @@ app.MapGet(
         "/yak-shop/stock/{daysAfterInit}",
         ([FromRoute] int daysAfterInit) =>
         {
-            return Results.Ok();
+            return TypedResults.Ok();
         }
     )
     .WithName("GetStockInfo")
@@ -57,13 +57,12 @@ app.MapPost(
         ([FromBody] Herd herd) =>
         {
             // 205 - Webshop is reset to the initial state.
-            return Results.StatusCode((int)HttpStatusCode.ResetContent);
+            return TypedResults.StatusCode((int)HttpStatusCode.ResetContent);
         }
     )
     .WithName("LoadHerd")
     .WithDescription("Returns a view of your stock after T days.")
-    .WithOpenApi()
-    .Produces(StatusCodes.Status205ResetContent);
+    .WithOpenApi();
 
 // POST /yak-shop/order/T
 app.MapPost(
@@ -71,21 +70,18 @@ app.MapPost(
         ([FromRoute] int daysAfterInit) =>
         {
             // 201 - The order was placed successfully.
-            //return Results.Created(order);
+            //return TypedResults.Created(order);
 
             // 206 - Can only deliver part of total order.
-            //return Results.StatusCode(StatusCodes.Status206PartialContent);
+            //return TypedResults.StatusCode(StatusCodes.Status206PartialContent);
 
             // 404 - The full order is not in stock.
-            return Results.NotFound("This endpoint is not yet implemented.");
+            return TypedResults.NotFound("This endpoint is not yet implemented.");
         }
     )
     .WithName("PlaceOrder")
     .WithDescription("Returns a view of your stock after T days.")
-    .WithOpenApi()
-    .Produces(StatusCodes.Status201Created, typeof(Order))
-    .Produces(StatusCodes.Status206PartialContent)
-    .Produces(StatusCodes.Status404NotFound);
+    .WithOpenApi();
 
 app.MapFallbackToFile("/index.html");
 
