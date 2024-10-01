@@ -1,8 +1,7 @@
 ﻿namespace YakShop.Server.Models
 {
-    public class Order
+    public record Order(Guid CustomerId, int Milk, int Skins)
     {
-        public int Milk { get; set; }
-        public int Skins { get; set; }
+        public required Customer Customer { get; set; }
     }
 }

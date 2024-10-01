@@ -1,8 +1,18 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace YakShop.Server.Models
 {
-    public record HerdMember(string Name, decimal Age, string Sex)
+    // TODO: Add a form of validation (e.g. for the Range attribute on the Age property).
+    // Unfortunately this doesn't seem to be supported -yet?- by System.Text.Json deserializer.
+    // See https://blog.json-everything.net/posts/deserialization-with-schemas/
+    //
+    public record HerdMember(
+        [Required] string Name,
+        [Required, Range(0, 10, ErrorMessage = "Age must be a positive value between 0 and 10.")]
+            decimal Age,
+        [Required] string Sex
+    )
     {
         [JsonIgnore]
         public short DaysAlive => (short)(Age * 100);

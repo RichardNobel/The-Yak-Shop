@@ -2,12 +2,13 @@
 
 namespace YakShop.Server.Data.Entities
 {
-    public record OrderEntity(Guid CustomerId, int Milk, int Skins)
+    public record CustomerEntity
     {
         [Key]
         public Guid Id { get; init; }
+        public string Name { get; init; } = string.Empty;
 
-        public required CustomerEntity Customer { get; init; }
+        public List<OrderEntity> Orders { get; init; } = [];
 
         [Timestamp]
         public byte[]? RowVersion { get; set; }

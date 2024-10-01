@@ -1,7 +1,10 @@
-﻿namespace YakShop.Server.Models
+﻿using System.Text.Json.Serialization;
+
+namespace YakShop.Server.Models
 {
     public record Herd
     {
-        public required List<HerdMember> Members { get; set; }
+        [JsonPropertyName("herd")]
+        public required List<HerdMember> Members { get; init; }
     }
 }

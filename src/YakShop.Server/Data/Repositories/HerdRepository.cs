@@ -12,14 +12,15 @@ namespace YakShop.Server.Data.Repositories
         void Save();
     }
 
-    public class HerdRepository(YakShopDb dbContext) : IHerdRepository
+    public class HerdRepository(YakShopDbContext dbContext) : IHerdRepository
     {
-        private readonly YakShopDb db = dbContext;
+        private readonly YakShopDbContext _db =
+            dbContext ?? throw new ArgumentNullException(nameof(dbContext));
 
         public Herd GetHerd() =>
             new()
             {
-                Members = db
+                Members = _db
                     .HerdMembers.Select(entity => new HerdMember(
                         entity.Name,
                         entity.Age,
@@ -32,18 +33,18 @@ namespace YakShop.Server.Data.Repositories
         {
             foreach (var member in herd.Members)
             {
-                db.HerdMembers.Add(new HerdMemberEntity(null, member.Name, member.Age, member.Sex));
+                _db.HerdMembers.Add(new HerdMemberEntity(member.Name, member.Age, member.Sex));
             }
         }
 
         public void DeleteHerd()
         {
-            db.Database.ExecuteSql($"TRUNCATE TABLE [{nameof(YakShopDb.HerdMembers)}]");
+            _db.Database.ExecuteSql($"TRUNCATE TABLE [{nameof(YakShopDbContext.HerdMembers)}]");
         }
 
         public void Save()
         {
-            db.SaveChanges();
+            _db.SaveChanges();
         }
 
         private bool disposed = false;
@@ -52,7 +53,7 @@ namespace YakShop.Server.Data.Repositories
         {
             if (!disposed && disposing)
             {
-                db.Dispose();
+                _db.Dispose();
             }
             disposed = true;
         }

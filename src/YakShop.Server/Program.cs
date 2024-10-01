@@ -2,6 +2,7 @@ using System.Net;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using YakShop.Server.Data;
+using YakShop.Server.Data.Repositories;
 using YakShop.Server.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,7 +13,7 @@ builder.Services.Configure<RouteHandlerOptions>(options => options.ThrowOnBadReq
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddDbContext<YakShopDb>(options =>
+builder.Services.AddDbContext<YakShopDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("TheYakShop"))
 );
 
@@ -67,12 +68,13 @@ app.MapPost(
         ([FromBody] Herd herd) =>
         {
             // 205 - Webshop is reset to the initial state.
-            return TypedResults.StatusCode((int)HttpStatusCode.ResetContent);
+            return TypedResults.StatusCode(StatusCodes.Status205ResetContent);
         }
     )
     .WithName("LoadHerd")
     .WithDescription("Returns a view of your stock after T days.")
-    .WithOpenApi();
+    .WithOpenApi()
+    .Produces(StatusCodes.Status205ResetContent);
 
 // POST /yak-shop/order/T
 app.MapPost(
