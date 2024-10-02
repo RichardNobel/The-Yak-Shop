@@ -2,11 +2,10 @@
 
 namespace YakShop.Server.Data.Entities
 {
-    public record CustomerEntity
+    public record CustomerEntity(string Name)
     {
         [Key]
         public Guid Id { get; init; }
-        public string Name { get; init; } = string.Empty;
 
         public List<OrderEntity> Orders { get; init; } = [];
 

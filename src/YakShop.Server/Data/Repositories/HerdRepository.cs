@@ -4,23 +4,21 @@ using YakShop.Server.Models;
 
 namespace YakShop.Server.Data.Repositories
 {
-    public interface IHerdRepository : IDisposable
+    public interface IHerdRepository : IBaseRepository<Herd>
     {
-        Herd GetHerd();
         void CreateHerd(Herd herd);
+        Herd GetHerd();
         void DeleteHerd();
-        void Save();
     }
 
-    public class HerdRepository(YakShopDbContext dbContext) : IHerdRepository
+    public class HerdRepository(YakShopDbContext dbContext)
+        : BaseRepository<Herd>(dbContext),
+            IHerdRepository
     {
-        private readonly YakShopDbContext _db =
-            dbContext ?? throw new ArgumentNullException(nameof(dbContext));
-
         public Herd GetHerd() =>
             new()
             {
-                Members = _db
+                Members = db
                     .HerdMembers.Select(entity => new HerdMember(
                         entity.Name,
                         entity.Age,
@@ -33,35 +31,13 @@ namespace YakShop.Server.Data.Repositories
         {
             foreach (var member in herd.Members)
             {
-                _db.HerdMembers.Add(new HerdMemberEntity(member.Name, member.Age, member.Sex));
+                db.HerdMembers.Add(new HerdMemberEntity(member.Name, member.Age, member.Sex));
             }
         }
 
         public void DeleteHerd()
         {
-            _db.Database.ExecuteSql($"TRUNCATE TABLE [{nameof(YakShopDbContext.HerdMembers)}]");
-        }
-
-        public void Save()
-        {
-            _db.SaveChanges();
-        }
-
-        private bool disposed = false;
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!disposed && disposing)
-            {
-                _db.Dispose();
-            }
-            disposed = true;
-        }
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
+            db.Database.ExecuteSql($"TRUNCATE TABLE [{nameof(YakShopDbContext.HerdMembers)}]");
         }
     }
 }

@@ -1,4 +1,4 @@
-using System.Net;
+using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using YakShop.Server.Data;
@@ -6,21 +6,7 @@ using YakShop.Server.Data.Repositories;
 using YakShop.Server.Models;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.Configure<RouteHandlerOptions>(options => options.ThrowOnBadRequest = true);
-
-// Add services to the container.
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-builder.Services.AddDbContext<YakShopDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("TheYakShop"))
-);
-
-#if DEBUG
-builder.Services.AddDatabaseDeveloperPageExceptionFilter();
-#endif
-
+ConfigureServices(builder.Services);
 var app = builder.Build();
 
 app.UseDefaultFiles();
@@ -65,36 +51,74 @@ app.MapGet(
 // POST /yak-shop/load
 app.MapPost(
         "/yak-shop/load",
-        ([FromBody] Herd herd) =>
+        ([FromBody] Herd herd, [FromServices] IHerdRepository herdRepo) =>
         {
+            herdRepo.CreateHerd(herd);
+            int numberOfRecordsCreated = herdRepo.Save();
+            Debug.WriteLine($"{numberOfRecordsCreated} yaks were added to the new herd.");
+
             // 205 - Webshop is reset to the initial state.
             return TypedResults.StatusCode(StatusCodes.Status205ResetContent);
         }
     )
     .WithName("LoadHerd")
-    .WithDescription("Returns a view of your stock after T days.")
+    .WithDescription(
+        "Loads a new herd into the webshop. Any previous state of the webshop is reset to the initial state."
+    )
     .WithOpenApi()
     .Produces(StatusCodes.Status205ResetContent);
 
 // POST /yak-shop/order/T
 app.MapPost(
         "/yak-shop/order/{daysAfterInit}",
-        ([FromRoute] int daysAfterInit) =>
+        (
+            [FromRoute] int daysAfterInit,
+            [FromBody] CustomerOrder customerOrder,
+            [FromServices] IOrderRepository orderRepo
+        ) =>
         {
+            // TODO: Check stock amounts for milk & skins.
+            customerOrder.Order.Customer = new Customer(customerOrder.CustomerName);
+            orderRepo.CreateOrder(customerOrder.Order);
+            orderRepo.Save();
+
             // 201 - The order was placed successfully.
-            //return TypedResults.Created(order);
+            return TypedResults.Created();
 
             // 206 - Can only deliver part of total order.
             //return TypedResults.StatusCode(StatusCodes.Status206PartialContent);
 
             // 404 - The full order is not in stock.
-            return TypedResults.NotFound("This endpoint is not yet implemented.");
+            //return TypedResults.NotFound("Unfortunately there is insufficient stock for the full order.");
         }
     )
     .WithName("PlaceOrder")
-    .WithDescription("Returns a view of your stock after T days.")
+    .WithDescription(
+        "Where [daysAfterInit] or T is the day the customer orders, this means that day T has _not_ elapsed."
+    )
     .WithOpenApi();
 
 app.MapFallbackToFile("/index.html");
 
 app.Run();
+
+void ConfigureServices(IServiceCollection services)
+{
+    services.Configure<RouteHandlerOptions>(options => options.ThrowOnBadRequest = true);
+
+    // Add services to the container.
+    // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+    services.AddEndpointsApiExplorer();
+    services.AddSwaggerGen();
+
+    services.AddDbContext<YakShopDbContext>(options =>
+        options.UseSqlServer(builder.Configuration.GetConnectionString("TheYakShop"))
+    );
+
+#if DEBUG
+    services.AddDatabaseDeveloperPageExceptionFilter();
+#endif
+
+    services.AddScoped<IHerdRepository, HerdRepository>();
+    services.AddScoped<IOrderRepository, OrderRepository>();
+}
