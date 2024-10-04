@@ -1,1 +1,9 @@
-/* You can add global styles to this file, and also import other style files */
+div.banner-ad.large {
+  background-color: #b3e4f3;
+}
+
+.banner-blocks-container {
+  background-image: url("assets/images/background-pattern.png");
+  background-size: contain;
+  background-repeat: repeat;
+}

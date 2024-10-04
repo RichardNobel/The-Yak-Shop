@@ -35,9 +35,10 @@
               "src/assets"
             ],
             "styles": [
-              "src/styles.css"
+              "src/styles.css",
+              "src/assets/css/ecommerce.css"
             ],
-            "scripts": []
+            "scripts": ["src/assets/js/ecommerce.js"]
           },
           "configurations": {
             "production": {
