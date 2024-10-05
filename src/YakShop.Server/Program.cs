@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using YakShop.Server.Data;
@@ -6,8 +5,12 @@ using YakShop.Server.Data.Repositories;
 using YakShop.Server.Models;
 
 var builder = WebApplication.CreateBuilder(args);
+
 ConfigureServices(builder.Services);
 var app = builder.Build();
+var logger = app.Services.GetRequiredService<ILogger<Program>>();
+
+CreateDbIfNotExists(app);
 
 app.UseDefaultFiles();
 app.UseStaticFiles();
@@ -29,6 +32,7 @@ app.MapGet(
         "/yak-shop/herd/{daysAfterInit}",
         ([FromRoute] int daysAfterInit) =>
         {
+            // TODO: Return herd view.
             return TypedResults.Ok();
         }
     )
@@ -41,6 +45,7 @@ app.MapGet(
         "/yak-shop/stock/{daysAfterInit}",
         ([FromRoute] int daysAfterInit) =>
         {
+            // TODO: Return stock view.
             return TypedResults.Ok();
         }
     )
@@ -55,7 +60,10 @@ app.MapPost(
         {
             herdRepo.CreateHerd(herd);
             int numberOfRecordsCreated = herdRepo.Save();
-            Debug.WriteLine($"{numberOfRecordsCreated} yaks were added to the new herd.");
+            logger.LogInformation(
+                "{Count} yaks were added to the new herd.",
+                numberOfRecordsCreated
+            );
 
             // 205 - Webshop is reset to the initial state.
             return TypedResults.StatusCode(StatusCodes.Status205ResetContent);
@@ -115,10 +123,30 @@ void ConfigureServices(IServiceCollection services)
         options.UseSqlServer(builder.Configuration.GetConnectionString("TheYakShop"))
     );
 
+    services.AddScoped<IDbInitializer, DbInitializer>();
+
 #if DEBUG
     services.AddDatabaseDeveloperPageExceptionFilter();
 #endif
 
     services.AddScoped<IHerdRepository, HerdRepository>();
     services.AddScoped<IOrderRepository, OrderRepository>();
+}
+
+void CreateDbIfNotExists(WebApplication app)
+{
+    logger.LogInformation("Making sure the database is created, including migrations.");
+    try
+    {
+        using var scope = app.Services.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<YakShopDbContext>();
+        context.Database.Migrate();
+
+        var dbInitializer = scope.ServiceProvider.GetRequiredService<IDbInitializer>();
+        dbInitializer.Initialize(context);
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "An error occurred creating the DB.");
+    }
 }
