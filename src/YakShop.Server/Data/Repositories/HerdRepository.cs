@@ -24,20 +24,20 @@ namespace YakShop.Server.Data.Repositories
                         entity.Age,
                         entity.Sex
                     ))
-                    .ToList()
+                    .ToArray()
             };
 
         public void CreateHerd(Herd herd)
         {
             foreach (var member in herd.Members)
             {
-                db.HerdMembers.Add(new HerdMemberEntity(member.Name, member.Age, member.Sex));
+                db.HerdMembers.Add(new HerdMemberEntity(member.Name, member.Age, member.Sex, ageLastShaved: member.Age));
             }
         }
 
         public void DeleteHerd()
         {
-            db.Database.ExecuteSql($"TRUNCATE TABLE [{nameof(YakShopDbContext.HerdMembers)}]");
+            db.HerdMembers.ExecuteDelete();
         }
     }
 }

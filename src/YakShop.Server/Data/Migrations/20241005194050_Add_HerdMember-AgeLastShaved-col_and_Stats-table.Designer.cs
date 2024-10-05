@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using YakShop.Server.Data;
 
@@ -11,9 +12,11 @@ using YakShop.Server.Data;
 namespace YakShop.Server.Data.Migrations
 {
     [DbContext(typeof(YakShopDbContext))]
-    partial class YakShopDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241005194050_Add_HerdMember-AgeLastShaved-col_and_Stats-table")]
+    partial class Add_HerdMemberAgeLastShavedcol_and_Statstable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

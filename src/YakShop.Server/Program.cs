@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using YakShop.Server.Data;
 using YakShop.Server.Data.Repositories;
+using YakShop.Server.Helpers;
 using YakShop.Server.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -56,14 +57,20 @@ app.MapGet(
 // POST /yak-shop/load
 app.MapPost(
         "/yak-shop/load",
-        ([FromBody] Herd herd, [FromServices] IHerdRepository herdRepo) =>
+        ([FromBody] Herd herd, [FromServices] IHerdRepository herdRepo, [FromServices] IStatRepository statRepo) =>
         {
+            herdRepo.DeleteHerd();
             herdRepo.CreateHerd(herd);
             int numberOfRecordsCreated = herdRepo.Save();
             logger.LogInformation(
-                "{Count} yaks were added to the new herd.",
+                "A new herd consisting of {Count} yaks was created.",
                 numberOfRecordsCreated
             );
+
+            statRepo.SetValue(StatKey.ShopOpenDate, DateTime.Now.ToString());
+            statRepo.SetValue(StatKey.StockSkins, herd.Members.Length.ToString());
+            decimal milkAmountOnInitialDay = YakProduceCalculator.TotalHerdLitersOfMilkToday(herd.Members);
+            statRepo.SetValue(StatKey.StockMilk, milkAmountOnInitialDay.ToString());
 
             // 205 - Webshop is reset to the initial state.
             return TypedResults.StatusCode(StatusCodes.Status205ResetContent);
@@ -131,6 +138,7 @@ void ConfigureServices(IServiceCollection services)
 
     services.AddScoped<IHerdRepository, HerdRepository>();
     services.AddScoped<IOrderRepository, OrderRepository>();
+    services.AddScoped<IStatRepository, StatRepository>();
 }
 
 void CreateDbIfNotExists(WebApplication app)

@@ -8,6 +8,7 @@ namespace YakShop.Server.Data
         public DbSet<CustomerEntity> Customers => Set<CustomerEntity>();
         public DbSet<HerdMemberEntity> HerdMembers => Set<HerdMemberEntity>();
         public DbSet<OrderEntity> Orders => Set<OrderEntity>();
+        public DbSet<StatEntity> Stats => Set<StatEntity>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -21,12 +22,18 @@ namespace YakShop.Server.Data
             {
                 builder.ToTable(nameof(HerdMembers));
                 builder.Property(hm => hm.Age).HasColumnType("decimal(4,2)");
+                builder.Property(hm => hm.AgeLastShaved).HasColumnType("decimal(4,2)");
             });
 
             modelBuilder.Entity<OrderEntity>(builder =>
             {
                 builder.ToTable(nameof(Orders));
                 builder.HasOne(o => o.Customer).WithMany(c => c.Orders);
+            });
+            
+            modelBuilder.Entity<StatEntity>(builder =>
+            {
+                builder.ToTable(nameof(Stats));
             });
         }
     }

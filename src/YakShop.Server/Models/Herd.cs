@@ -5,6 +5,6 @@ namespace YakShop.Server.Models
     public record Herd
     {
         [JsonPropertyName("herd")]
-        public required List<HerdMember> Members { get; init; }
+        public required HerdMember[] Members { get; init; }
     }
 }

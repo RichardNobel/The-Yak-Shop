@@ -3,6 +3,17 @@ using System.Text.Json.Serialization;
 
 namespace YakShop.Server.Models
 {
+    public interface IHerdMember
+    {
+        decimal Age { get; init; }
+
+        [JsonIgnore]
+        decimal AgeLastShaved { get; init; }
+
+        string Name { get; init; }
+        string Sex { get; init; }
+    }
+
     // TODO: Add a form of validation (e.g. for the Range attribute on the Age property).
     // Unfortunately this doesn't seem to be supported -yet?- by System.Text.Json deserializer.
     // See https://blog.json-everything.net/posts/deserialization-with-schemas/
@@ -13,7 +24,7 @@ namespace YakShop.Server.Models
     /// <param name="Name"></param>
     /// <param name="Age">The age is given in standard Yak years (0-10).</param>
     /// <param name="Sex">MALE or FEMALE</param>
-    public record HerdMember
+    public record HerdMember : IHerdMember
     {
         public HerdMember(string name, decimal age, string sex)
         {
@@ -33,8 +44,12 @@ namespace YakShop.Server.Models
             Sex = sex;
         }
 
-        [Required, Range(0, 10, ErrorMessage = "Age must be a positive value between 0 and 10.")]
-        public decimal Age { get; set; }
+        [Required]
+        public decimal Age { get; init; }
+
+        [Required]
+        [JsonIgnore]
+        public decimal AgeLastShaved { get; init; }
 
         [Required]
         public string Name { get; init; }
