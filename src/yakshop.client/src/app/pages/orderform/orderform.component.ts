@@ -3,6 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 import { CustomerOrder } from '../../models/CustomerOrder';
 import { StockInfo } from '../../models/StockInfo';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-orderform',
@@ -18,7 +19,7 @@ export class OrderFormComponent implements OnInit {
     skinsQuantity: [1, Validators.required],
   });
 
-  constructor(private readonly formBuilder: FormBuilder, private readonly http: HttpClient) {}
+  constructor(private readonly router: Router, private readonly formBuilder: FormBuilder, private readonly http: HttpClient) {}
 
   ngOnInit() {
     this.getStockInfo();
@@ -52,7 +53,7 @@ export class OrderFormComponent implements OnInit {
     const order = new CustomerOrder(this.customerName.value!, this.milkQuantity.value!, this.skinsQuantity.value!);
     this.http.post<CustomerOrder>('/yak-shop/order/0', order).subscribe({
       next: (result) => {
-        // TODO: Redirect to "Thank You" page.
+        this.router.navigate(['order-thankyou']);
       },
       error: (error: any) => {
         console.error(error);

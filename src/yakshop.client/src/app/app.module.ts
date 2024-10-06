@@ -9,14 +9,17 @@ import { ReactiveFormsModule } from '@angular/forms';
 
 import { provideRouter } from '@angular/router';
 import { routes } from './app.routes';
+
 import { HomepageComponent } from './pages/homepage/homepage.component';
 import { OrderFormComponent } from './pages/orderform/orderform.component';
+import { OrderThankyouComponent } from './pages/order-thankyou/order-thankyou.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     HomepageComponent,
-    OrderFormComponent
+    OrderFormComponent,
+    OrderThankyouComponent
   ],
   imports: [
     BrowserModule, HttpClientModule,
