@@ -1,0 +1,114 @@
+<section class="order-form-container py-3">
+  <div class="container-fluid">
+    <div class="row mt-2 mb-3">
+      <h1>Order Form</h1>
+    </div>
+
+    <form [formGroup]="orderForm" (ngSubmit)="onSubmit()">
+      <div class="row mb-1">
+        <div class="col-sm-2 offset-sm-4">
+          <div class="card">
+            <img src="assets/images/orderform-product-milk.png" class="card-img-top" alt="Milk">
+            <div class="card-body">
+              <h5 class="card-title">Milk</h5>
+              <div class="input-group">
+                <input type="number" min="0" class="form-control" id="milkQuantity" formControlName="milkQuantity" aria-label="Liters of yak milk" aria-describedby="milk-unit-addon">
+                <span class="input-group-text" id="milk-unit-addon">liters</span>
+              </div>
+              @if (milkQuantity.invalid && (milkQuantity.dirty || milkQuantity.touched)) {
+                <div class="alert alert-danger mt-1">
+                  <div *ngIf="milkQuantity.hasError('required')">
+                    Quantity is required.
+                  </div>
+                </div>
+              }
+              <p class="mt-2 small">in stock: {{ stockInfo?.milk }} L</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-sm-2">
+          <div class="card">
+            <img src="assets/images/orderform-product-furcoat.png" class="card-img-top" alt="Wool/Fur">
+            <div class="card-body">
+              <h5 class="card-title">Wool/Fur</h5>
+              <div class="input-group">
+                <input type="number" min="0" class="form-control" id="skinsQuantity" formControlName="skinsQuantity" aria-label="Pieces of yak fur" aria-describedby="fur-unit-addon">
+                <span class="input-group-text" id="fur-unit-addon">pieces</span>
+              </div>
+              @if (skinsQuantity.invalid && (skinsQuantity.dirty || skinsQuantity.touched)) {
+                <div class="alert alert-danger mt-1">
+                  <div *ngIf="skinsQuantity.hasError('required')">
+                    Quantity is required.
+                  </div>
+                </div>
+              }
+              <p class="mt-2 small">in stock: {{ stockInfo?.skins }} pcs.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row mb-3">
+        <div class="col-sm-4 offset-sm-4">
+          <div class="card">
+            <div class="card-body">
+              <div class="row">
+                <div class="col-sm-12">
+                  <p class="form-control-static"><strong>Where have you <em>herd</em> 😉 about our shop?</strong></p>
+                </div>
+              </div>
+              <div class="row">
+                <label for="customerRef1" class="col-sm-10 offset-sm-1 col-form-label">
+                  <input class="form-check-input" type="radio" name="customerRef1" id="customerRef1">
+                  The Yak Aficionados Klub (Y.A.K.)
+                </label>
+              </div>
+              <div class="row">
+                <label for="customerRef2" class="col-sm-10 offset-sm-1 col-form-label">
+                  <input class="form-check-input" type="radio" name="customerRef2" id="customerRef2">
+                  Newspaper ad in the 'Dairy Planet'
+                </label>
+              </div>
+              <div class="row mb-2">
+                <label for="customerRef3" class="col-sm-10 offset-sm-1 col-form-label">
+                  <input class="form-check-input" type="radio" name="customerRef3" id="customerRef3">
+                  Other <small>(please specify)</small>
+                  &nbsp;<input type="text" name="customerRefOtherText" id="customerRefOtherText">
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row mb-5">
+        <div class="col-sm-4 offset-sm-4">
+          <div class="card">
+            <div class="card-body">
+              <div class="row">
+                <label for="customerName" class="form-label">Your name</label>
+                <input type="text" class="form-control" id="customerName" formControlName="customerName">
+                @if (customerName.invalid && (customerName.dirty || customerName.touched)) {
+                  <div class="alert alert-danger mt-1">
+                    <div *ngIf="customerName.hasError('required')">
+                      Name is required.
+                    </div>
+                    <div *ngIf="customerName.hasError('minlength')">
+                      Name must be at least 2 characters long.
+                    </div>
+                  </div>
+                }
+              </div>
+              <div class="row mt-3">
+                <div class="col-sm-6 offset-sm-3">
+                  <button type="submit" class="btn btn-primary" [disabled]="!orderForm.valid">Submit order</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </form>
+  </div>
+</section>

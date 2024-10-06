@@ -5,16 +5,23 @@ import { BrowserModule } from '@angular/platform-browser';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 
+import { ReactiveFormsModule } from '@angular/forms';
+
 import { provideRouter } from '@angular/router';
 import { routes } from './app.routes';
+import { HomepageComponent } from './pages/homepage/homepage.component';
+import { OrderFormComponent } from './pages/orderform/orderform.component';
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
+    HomepageComponent,
+    OrderFormComponent
   ],
   imports: [
     BrowserModule, HttpClientModule,
-    AppRoutingModule
+    AppRoutingModule,
+    ReactiveFormsModule
   ],
   providers: [provideRouter(routes)],
   bootstrap: [AppComponent]

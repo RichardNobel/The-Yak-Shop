@@ -54,6 +54,19 @@ app.MapGet(
     .WithDescription("Returns a view of your stock after T days.")
     .WithOpenApi();
 
+// GET /yak-shop/current-stock
+app.MapGet(
+        "/yak-shop/current-stock",
+        ([FromServices] IStatRepository statRepo) =>
+        {
+            var milkAndSkinsAmounts = statRepo.GetCurrentStockStats();
+            return TypedResults.Ok(milkAndSkinsAmounts);
+        }
+    )
+    .WithName("GetCurrentStock")
+    .WithDescription("Returns a view of your current stock.")
+    .WithOpenApi();
+
 // POST /yak-shop/load
 app.MapPost(
         "/yak-shop/load",

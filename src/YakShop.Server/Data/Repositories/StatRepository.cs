@@ -5,12 +5,21 @@ namespace YakShop.Server.Data.Repositories
 {
     internal interface IStatRepository : IBaseRepository<Stat>
     {
+        StockInfo GetCurrentStockStats();
         string GetValue(string key);
         void SetValue(string key, string value);
     }
 
     public class StatRepository(YakShopDbContext dbContext) : BaseRepository<Stat>(dbContext), IStatRepository
     {
+        public StockInfo GetCurrentStockStats()
+        {
+            var stats = db.Stats.Where(s => s.Key.Contains("Stock")).ToList();
+            _ = decimal.TryParse(stats.SingleOrDefault(s => s.Key == "StockMilk")?.Value, out decimal milkAmount);
+            _ = int.TryParse(stats.SingleOrDefault(s => s.Key == "StockSkins")?.Value, out int skinsAmount);
+            return new StockInfo(milkAmount, skinsAmount);
+        }
+
         public string GetValue(string key)
         {
             return db.Stats.FirstOrDefault(s => s.Key == key)?.Value
