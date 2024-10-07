@@ -4,14 +4,19 @@ using YakShop.Server.Data;
 using YakShop.Server.Data.Repositories;
 using YakShop.Server.Helpers;
 using YakShop.Server.Models;
+using YakShop.Server.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-ConfigureServices(builder.Services);
+ConfigureServices(builder.Services, builder.Configuration);
 var app = builder.Build();
 var logger = app.Services.GetRequiredService<ILogger<Program>>();
 
 CreateDbIfNotExists(app);
+
+// TODO: Enable timer service
+//var timerService = app.Services.GetRequiredService<TimeLapseSimulationHostedService>();
+//timerService.IsEnabled = true;
 
 app.UseDefaultFiles();
 app.UseStaticFiles();
@@ -70,7 +75,10 @@ app.MapGet(
 // POST /yak-shop/load
 app.MapPost(
         "/yak-shop/load",
-        ([FromBody] Herd herd, [FromServices] IHerdRepository herdRepo, [FromServices] IStatRepository statRepo) =>
+        ([FromBody] Herd herd,
+         [FromServices] IHerdRepository herdRepo,
+         [FromServices] IStatRepository statRepo,
+         [FromServices] IProduceDayRepository produceDayRepo) =>
         {
             herdRepo.DeleteHerd();
             herdRepo.CreateHerd(herd);
@@ -81,9 +89,11 @@ app.MapPost(
             );
 
             statRepo.SetValue(StatKey.ShopOpenDate, DateTime.Now.ToString());
-            statRepo.SetValue(StatKey.StockSkins, herd.Members.Length.ToString());
-            decimal milkAmountOnInitialDay = YakProduceCalculator.TotalHerdLitersOfMilkToday(herd.Members);
-            statRepo.SetValue(StatKey.StockMilk, milkAmountOnInitialDay.ToString());
+
+            produceDayRepo.DeleteAll();
+            var initialStockSkins = herd.Members.Length;
+            var initialStockMilk = YakProduceCalculator.TotalHerdLitersOfMilkToday(herd.Members);
+            produceDayRepo.Add(new ProduceDay(0, initialStockMilk, initialStockSkins));
 
             // 205 - Webshop is reset to the initial state.
             return TypedResults.StatusCode(StatusCodes.Status205ResetContent);
@@ -113,10 +123,10 @@ app.MapPost(
             // 201 - The order was placed successfully.
             return TypedResults.Created();
 
-            // 206 - Can only deliver part of total order.
+            // TODO: 206 - Can only deliver part of total order.
             //return TypedResults.StatusCode(StatusCodes.Status206PartialContent);
 
-            // 404 - The full order is not in stock.
+            // TODO: 404 - The full order is not in stock.
             //return TypedResults.NotFound("Unfortunately there is insufficient stock for the full order.");
         }
     )
@@ -130,7 +140,7 @@ app.MapFallbackToFile("/index.html");
 
 app.Run();
 
-void ConfigureServices(IServiceCollection services)
+void ConfigureServices(IServiceCollection services, ConfigurationManager config)
 {
     services.Configure<RouteHandlerOptions>(options => options.ThrowOnBadRequest = true);
 
@@ -140,7 +150,7 @@ void ConfigureServices(IServiceCollection services)
     services.AddSwaggerGen();
 
     services.AddDbContext<YakShopDbContext>(options =>
-        options.UseSqlServer(builder.Configuration.GetConnectionString("TheYakShop"))
+        options.UseSqlServer(config.GetConnectionString("TheYakShop"))
     );
 
     services.AddScoped<IDbInitializer, DbInitializer>();
@@ -149,9 +159,19 @@ void ConfigureServices(IServiceCollection services)
     services.AddDatabaseDeveloperPageExceptionFilter();
 #endif
 
+    services.AddScoped<DailyHerdStatsUpdateService>();
     services.AddScoped<IHerdRepository, HerdRepository>();
     services.AddScoped<IOrderRepository, OrderRepository>();
+    services.AddScoped<IProduceDayRepository, ProduceDayRepository>();
     services.AddScoped<IStatRepository, StatRepository>();
+
+    // Register as singleton first so it can be injected through Dependency Injection
+    services.AddSingleton<TimeLapseSimulationHostedService>();
+
+    // Add as hosted service using the instance registered as singleton before
+    services.AddHostedService(
+        provider => provider.GetRequiredService<TimeLapseSimulationHostedService>());
+
 }
 
 void CreateDbIfNotExists(WebApplication app)
@@ -164,7 +184,8 @@ void CreateDbIfNotExists(WebApplication app)
         context.Database.Migrate();
 
         var dbInitializer = scope.ServiceProvider.GetRequiredService<IDbInitializer>();
-        dbInitializer.Initialize(context);
+        var produceDayRepository = scope.ServiceProvider.GetRequiredService<IProduceDayRepository>();
+        dbInitializer.Initialize(context, produceDayRepository);
     }
     catch (Exception ex)
     {

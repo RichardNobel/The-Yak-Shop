@@ -8,6 +8,7 @@ namespace YakShop.Server.Data
         public DbSet<CustomerEntity> Customers => Set<CustomerEntity>();
         public DbSet<HerdMemberEntity> HerdMembers => Set<HerdMemberEntity>();
         public DbSet<OrderEntity> Orders => Set<OrderEntity>();
+        public DbSet<ProduceDayEntity> ProduceDays => Set<ProduceDayEntity>();
         public DbSet<StatEntity> Stats => Set<StatEntity>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -30,7 +31,14 @@ namespace YakShop.Server.Data
                 builder.ToTable(nameof(Orders));
                 builder.HasOne(o => o.Customer).WithMany(c => c.Orders);
             });
-            
+
+            modelBuilder.Entity<ProduceDayEntity>(builder =>
+            {
+                builder.ToTable(nameof(ProduceDays));
+                builder.HasKey(pd => pd.DayNumber);
+                builder.Property(pd => pd.Milk).HasColumnType("decimal(4,2)");
+            });
+
             modelBuilder.Entity<StatEntity>(builder =>
             {
                 builder.ToTable(nameof(Stats));

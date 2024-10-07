@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using YakShop.Server.Data.Entities;
+using YakShop.Server.Data.Repositories;
 using YakShop.Server.Helpers;
 using YakShop.Server.Models;
 
@@ -7,12 +8,12 @@ namespace YakShop.Server.Data
 {
     public interface IDbInitializer
     {
-        void Initialize(YakShopDbContext context);
+        void Initialize(YakShopDbContext context, IProduceDayRepository produceDayRepo);
     }
 
     public class DbInitializer : IDbInitializer
     {
-        public void Initialize(YakShopDbContext context)
+        public void Initialize(YakShopDbContext context, IProduceDayRepository produceDayRepo)
         {
             context.Database.Migrate();
 
@@ -30,20 +31,21 @@ namespace YakShop.Server.Data
                 new("Yak-3", age: (decimal)9.5, "FEMALE", ageLastShaved: (decimal)9.5),
             };
 
+            foreach (HerdMemberEntity hm in herdMembers)
+            {
+                context.HerdMembers.Add(hm);
+            }
+
             // "The moment you open up the Yak Shop webshop will be day 0, and all yaks are eligible to be shaven,
             //  as the two of you spent quite a lot of time setting up this shop and the shepherd wasn't able to
             //  attend much to his herd."
             //
             // For this reason the shop starts with [number of yaks] amount of skins/fur coats initially.
-            context.Stats.Add(new StatEntity(StatKey.StockSkins, herdMembers.Length.ToString()));
+            var initialStockSkins = herdMembers.Length;
 
-            decimal milkAmountOnInitialDay = YakProduceCalculator.TotalHerdLitersOfMilkToday(herdMembers);
-            context.Stats.Add(new StatEntity(StatKey.StockMilk, milkAmountOnInitialDay.ToString()));
+            var initialStockMilk = YakProduceCalculator.TotalHerdLitersOfMilkToday(herdMembers);
 
-            foreach (HerdMemberEntity hm in herdMembers)
-            {
-                context.HerdMembers.Add(hm);
-            }
+            produceDayRepo.Add(new ProduceDay(0, initialStockMilk, initialStockSkins));
 
             context.SaveChanges();
         }

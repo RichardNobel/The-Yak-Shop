@@ -2,7 +2,7 @@
 
 namespace YakShop.Server.Data.Entities
 {
-    public record OrderEntity([Required] Guid CustomerId, [Required] int Milk, [Required] int Skins)
+    public record OrderEntity([Required] int DayNumber, [Required] Guid CustomerId, [Required] int Milk, [Required] int Skins)
     {
         [Key]
         public Guid Id { get; init; }
