@@ -6,25 +6,39 @@ namespace YakShop.Server.Helpers
     {
         public static decimal SingleYakLitersOfMilkByAge(decimal ageInDays)
         {
+            if (ageInDays > 999)
+            {
+                return 0;
+            }
+
             return 50 - (ageInDays * (decimal)0.03);
         }
 
-        public static decimal NextShaveDay(decimal ageInDays)
+        public static decimal NextShaveDay(decimal ageInDays, decimal ageLastShaved)
         {
-            return 8 + (ageInDays * (decimal)0.01);
+            decimal nextShaveDay = (8 + (ageInDays * (decimal)0.01)) + ageLastShaved;
+            return Math.Floor(nextShaveDay);
         }
 
-        public static bool IsEligibleToBeShaven(decimal ageInDays)
+        public static bool IsEligibleToBeShaven(decimal ageInDays, decimal ageLastShaved)
         {
-            return NextShaveDay(ageInDays) == ageInDays;
+            if (ageInDays < 100 || ageInDays > 999)
+            {
+                return false;
+            }
+
+            return ageInDays >= NextShaveDay(ageInDays, ageLastShaved);
         }
 
-        internal static decimal TotalHerdLitersOfMilkToday(IEnumerable<IHerdMember> herdMembers)
+        public static decimal TotalHerdLitersOfMilkToday(IEnumerable<IHerdMember> herdMembers)
         {
             decimal milkAmount = 0;
-            foreach (var yak in herdMembers.Where(hm => hm.Sex.Equals("FEMALE", StringComparison.InvariantCultureIgnoreCase)))
+            foreach (var yak in herdMembers.Where(
+                hm => hm.Sex.Equals("FEMALE", StringComparison.InvariantCultureIgnoreCase)
+                && hm.Age < 10
+            ))
             {
-                milkAmount += SingleYakLitersOfMilkByAge(yak.Age);
+                milkAmount += SingleYakLitersOfMilkByAge(yak.Age * 100);
             }
 
             return milkAmount;
