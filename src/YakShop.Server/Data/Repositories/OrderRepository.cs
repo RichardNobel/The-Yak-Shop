@@ -1,4 +1,5 @@
-﻿using YakShop.Server.Data.Entities;
+﻿using Microsoft.EntityFrameworkCore;
+using YakShop.Server.Data.Entities;
 using YakShop.Server.Models;
 
 namespace YakShop.Server.Data.Repositories
@@ -7,7 +8,7 @@ namespace YakShop.Server.Data.Repositories
     {
         Order CreateOrder(Order order);
 
-        (decimal milk, int skins) GetTotalQuantitiesUntilDay(int dayNumber);
+        Task<(decimal milk, int skins)> GetTotalAmountsUntilDayAsync(int dayNumber);
     }
 
     public class OrderRepository(YakShopDbContext dbContext)
@@ -30,12 +31,13 @@ namespace YakShop.Server.Data.Repositories
             return order;
         }
 
-        public (decimal milk, int skins) GetTotalQuantitiesUntilDay(int dayNumber)
+        public async Task<(decimal milk, int skins)> GetTotalAmountsUntilDayAsync(int dayNumber)
         {
-            var totals = db.Orders.Where(o => (o.DayNumber <= dayNumber))
+            var totals = await db.Orders.Where(o => (o.DayNumber <= dayNumber))
                 .GroupBy(pd => 1)
                 .Select(g => new { Milk = g.Sum(o => o.Milk), Skins = g.Sum(o => o.Skins) })
-                .FirstOrDefault();
+                .FirstOrDefaultAsync();
+
             return totals == null ? (0, 0) : (totals.Milk, totals.Skins);
         }
     }

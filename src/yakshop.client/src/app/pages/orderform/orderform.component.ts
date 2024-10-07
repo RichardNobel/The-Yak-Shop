@@ -4,6 +4,7 @@ import { FormBuilder, Validators } from '@angular/forms';
 import { CustomerOrder } from '../../models/CustomerOrder';
 import { StockInfo } from '../../models/StockInfo';
 import { Router } from '@angular/router';
+import { SignalrService } from '../../services/signalr.service';
 
 @Component({
   selector: 'app-orderform',
@@ -19,10 +20,15 @@ export class OrderFormComponent implements OnInit {
     skinsQuantity: [1, Validators.required],
   });
 
-  constructor(private readonly router: Router, private readonly formBuilder: FormBuilder, private readonly http: HttpClient) {}
+  constructor(private readonly router: Router, 
+    private readonly formBuilder: FormBuilder, 
+    private readonly http: HttpClient,
+    public signalRService: SignalrService
+  ) {}
 
   ngOnInit() {
-    this.getStockInfo();
+    this.signalRService.startConnection();
+    this.signalRService.addRealTimeStockDataListener();
   }
 
   get customerName() {
@@ -37,25 +43,15 @@ export class OrderFormComponent implements OnInit {
     return this.orderForm.get('skinsQuantity')!;
   }
 
-  getStockInfo() {
-    this.http.get<StockInfo>('/yak-shop/current-stock').subscribe({
-      next: (result) => {
-        this.stockInfo = result;
-      },
-      error: (error: any) => {
-        console.error(error);
-      },
-      complete: () => {},
-    });
-  }
-
   onSubmit() {
     const order = new CustomerOrder(this.customerName.value!, this.milkQuantity.value!, this.skinsQuantity.value!);
-    this.http.post<CustomerOrder>('/yak-shop/order/1', order).subscribe({
+    this.http.post<CustomerOrder>(`/yak-shop/order/${this.signalRService.stockInfo.dayNumber}`, order).subscribe({
       next: (result) => {
+        // TODO: Make the user aware (on the "Thank You" page?) if an order can only be partially fulfilled.
         this.router.navigate(['order-thankyou']);
       },
       error: (error: any) => {
+        // TODO: Notify customer if order placement fails (e.g. because of insufficient stock)
         console.error(error);
       },
       complete: () => {},  

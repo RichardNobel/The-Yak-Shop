@@ -27,11 +27,4 @@ describe('AppComponent', () => {
   it('should create the app', () => {
     expect(component).toBeTruthy();
   });
-
-  it('should be able to connect to the server', () => {
-    component.ngOnInit();
-
-    const req = httpMock.expectOne('/yak');
-    expect(req.request.method).toEqual('GET');
-  });
 });

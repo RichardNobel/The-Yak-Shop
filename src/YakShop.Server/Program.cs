@@ -15,8 +15,10 @@ var logger = app.Services.GetRequiredService<ILogger<Program>>();
 CreateDbIfNotExists(app);
 
 // TODO: Enable timer service
-//var timerService = app.Services.GetRequiredService<TimeLapseSimulationHostedService>();
-//timerService.IsEnabled = true;
+var timerService = app.Services.GetRequiredService<TimeLapseSimulationHostedService>();
+timerService.IsEnabled = true;
+
+app.UseCors("CorsPolicy");
 
 app.UseDefaultFiles();
 app.UseStaticFiles();
@@ -59,19 +61,6 @@ app.MapGet(
     .WithDescription("Returns a view of your stock after T days.")
     .WithOpenApi();
 
-// GET /yak-shop/current-stock
-app.MapGet(
-        "/yak-shop/current-stock",
-        ([FromServices] IStatRepository statRepo) =>
-        {
-            var milkAndSkinsAmounts = statRepo.GetCurrentStockStats();
-            return TypedResults.Ok(milkAndSkinsAmounts);
-        }
-    )
-    .WithName("GetCurrentStock")
-    .WithDescription("Returns a view of your current stock.")
-    .WithOpenApi();
-
 // POST /yak-shop/load
 app.MapPost(
         "/yak-shop/load",
@@ -107,7 +96,7 @@ app.MapPost(
     .Produces(StatusCodes.Status205ResetContent);
 
 // POST /yak-shop/order/T
-app.MapPost("/yak-shop/order/{daysAfterInit}", HandleOrder)
+app.MapPost("/yak-shop/order/{daysAfterInit}", HandleOrderAsync)
     .WithName("PlaceOrder")
     .WithDescription(
         "Where [daysAfterInit] or T is the day the customer orders, this means that day T has _not_ elapsed."
@@ -115,6 +104,9 @@ app.MapPost("/yak-shop/order/{daysAfterInit}", HandleOrder)
     .WithOpenApi();
 
 app.MapFallbackToFile("/index.html");
+
+// Register the SignalR hub for sending real-time updates to the client app in the browser.
+app.MapHub<RealTimeHub>("/realtimehub");
 
 app.Run();
 
@@ -126,6 +118,16 @@ void ConfigureServices(IServiceCollection services, ConfigurationManager config)
     // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
     services.AddEndpointsApiExplorer();
     services.AddSwaggerGen();
+
+    services.AddSignalR();
+    builder.Services.AddCors(options =>
+    {
+        options.AddPolicy("CorsPolicy", builder => builder
+            .WithOrigins("https://localhost:4200")
+            .AllowAnyMethod()
+            .AllowAnyHeader()
+            .AllowCredentials());
+    });
 
     services.AddDbContext<YakShopDbContext>(options =>
         options.UseSqlServer(config.GetConnectionString("TheYakShop"))
@@ -151,7 +153,6 @@ void ConfigureServices(IServiceCollection services, ConfigurationManager config)
     // Add as hosted service using the instance registered as singleton before
     services.AddHostedService(
         provider => provider.GetRequiredService<TimeLapseSimulationHostedService>());
-
 }
 
 void CreateDbIfNotExists(WebApplication app)
@@ -173,7 +174,7 @@ void CreateDbIfNotExists(WebApplication app)
     }
 }
 
-IResult HandleOrder([FromRoute] int daysAfterInit,
+async Task<IResult> HandleOrderAsync([FromRoute] int daysAfterInit,
             [FromBody] CustomerOrder customerOrder,
             [FromServices] StockQuantitiesCalculatorService stockCalc,
             [FromServices] IOrderRepository orderRepo)
@@ -183,7 +184,7 @@ IResult HandleOrder([FromRoute] int daysAfterInit,
     order.Customer = new Customer(customerOrder.CustomerName);
 
     // Check stock amounts for milk & skins.
-    var (milk, skins) = stockCalc.CalculateForDay(daysAfterInit);
+    var (milk, skins) = await stockCalc.CalculateForDayAsync(daysAfterInit);
 
     if (order.Milk > milk && order.Skins > skins)
     {

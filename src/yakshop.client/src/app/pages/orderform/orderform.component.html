@@ -1,7 +1,7 @@
 <section class="order-form-container py-3">
   <div class="container-fluid">
     <div class="row mt-2 mb-3">
-      <h1>Order Form</h1>
+      <h1 title="{{signalRService.stockInfo.dayNumber}}">Order Form</h1>
     </div>
 
     <form [formGroup]="orderForm" (ngSubmit)="onSubmit()">
@@ -22,7 +22,7 @@
                   </div>
                 </div>
               }
-              <p class="mt-2 small">in stock: {{ stockInfo?.milk }} L</p>
+              <p class="mt-2 small">in stock: {{ signalRService.stockInfo.milk }} L</p>
             </div>
           </div>
         </div>
@@ -42,7 +42,7 @@
                   </div>
                 </div>
               }
-              <p class="mt-2 small">in stock: {{ stockInfo?.skins }} pcs.</p>
+              <p class="mt-2 small">in stock: {{ signalRService.stockInfo.skins }} pcs.</p>
             </div>
           </div>
         </div>
@@ -101,7 +101,7 @@
               </div>
               <div class="row mt-3">
                 <div class="col-sm-6 offset-sm-3">
-                  <button type="submit" class="btn btn-primary" [disabled]="!orderForm.valid">Submit order</button>
+                  <button type="submit" class="btn btn-primary" [disabled]="!orderForm.valid || !signalRService.stockInfo">Submit order</button>
                 </div>
               </div>
             </div>

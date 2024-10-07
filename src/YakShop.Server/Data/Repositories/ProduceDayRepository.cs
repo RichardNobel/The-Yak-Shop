@@ -10,7 +10,7 @@ namespace YakShop.Server.Data.Repositories
         void DeleteAll();
         ProduceDay? Get(int dayNumber);
         ProduceDay GetLatest();
-        (decimal milk, int skins) GetTotalQuantitiesUntilDay(int dayNumber);
+        Task<(decimal milk, int skins)> GetTotalAmountsUntilDayAsync(int dayNumber);
     }
 
     public class ProduceDayRepository(YakShopDbContext dbContext)
@@ -42,10 +42,10 @@ namespace YakShop.Server.Data.Repositories
                 : new ProduceDay(produceDayEntity);
         }
 
-        public (decimal milk, int skins) GetTotalQuantitiesUntilDay(int dayNumber)
+        public async Task<(decimal milk, int skins)> GetTotalAmountsUntilDayAsync(int dayNumber)
         {
-            var totals = db.ProduceDays.Where(pd => (pd.DayNumber <= dayNumber))
-                .GroupBy(pd => 1).Select(g => new { Milk = g.Sum(pd => pd.Milk), Skins = g.Sum(pd => pd.Skins) }).FirstOrDefault();
+            var totals = await db.ProduceDays.Where(pd => (pd.DayNumber <= dayNumber))
+                .GroupBy(pd => 1).Select(g => new { Milk = g.Sum(pd => pd.Milk), Skins = g.Sum(pd => pd.Skins) }).FirstOrDefaultAsync();
             return totals == null ? (0, 0) : (totals.Milk, totals.Skins);
         }
     }

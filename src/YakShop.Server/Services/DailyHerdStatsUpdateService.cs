@@ -1,16 +1,19 @@
-﻿using YakShop.Server.Data.Repositories;
+﻿using Microsoft.AspNetCore.SignalR;
+using YakShop.Server.Data.Repositories;
+using YakShop.Server.Models;
 
 namespace YakShop.Server.Services
 {
     internal class DailyHerdStatsUpdateService(
+        IHubContext<RealTimeHub> realTimeHubContext,
         ILogger<DailyHerdStatsUpdateService> logger,
         IProduceDayRepository produceDayRepo,
-        IOrderRepository orderRepo
+        StockQuantitiesCalculatorService stockCalc
     )
     {
         private readonly ILogger<DailyHerdStatsUpdateService> _logger = logger;
         private readonly IProduceDayRepository _produceDayRepo = produceDayRepo;
-        private readonly IOrderRepository _orderRepo = orderRepo;
+        private readonly StockQuantitiesCalculatorService _stockCalc = stockCalc;
 
         public async Task RunAsync()
         {
@@ -20,7 +23,11 @@ namespace YakShop.Server.Services
 
             var latestProduceDayNumber = _produceDayRepo.GetLatest().DayNumber;
 
-            var totalProduce = _produceDayRepo.GetTotalQuantitiesUntilDay(latestProduceDayNumber);
+            // Check stock amounts for milk & skins.
+            var (milk, skins) = await _stockCalc.CalculateForDayAsync(latestProduceDayNumber);
+            await realTimeHubContext.Clients.All.SendAsync("ReceiveStockData", new StockInfo(latestProduceDayNumber, milk, skins));
+
+
         }
     }
 }

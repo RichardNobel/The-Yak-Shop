@@ -10,10 +10,10 @@ namespace YakShop.Server.Services
         private readonly IProduceDayRepository _produceDayRepo = produceDayRepo;
         private readonly IOrderRepository _orderRepo = orderRepo;
 
-        public (decimal milk, int skins) CalculateForDay(int dayNumber)
+        public async Task<(decimal milk, int skins)> CalculateForDayAsync(int dayNumber)
         {
-            var produceTotals = _produceDayRepo.GetTotalQuantitiesUntilDay(dayNumber);
-            var orderTotals = _orderRepo.GetTotalQuantitiesUntilDay(dayNumber);
+            var produceTotals = await _produceDayRepo.GetTotalAmountsUntilDayAsync(dayNumber);
+            var orderTotals = await _orderRepo.GetTotalAmountsUntilDayAsync(dayNumber);
 
             return (produceTotals.milk - orderTotals.milk, produceTotals.skins - orderTotals.skins);
         }
