@@ -44,7 +44,8 @@ namespace YakShop.Server.Data.Repositories
 
         public (decimal milk, int skins) GetTotalQuantitiesUntilDay(int dayNumber)
         {
-            var totals = db.ProduceDays.GroupBy(pd => 1).Select(g => new { Milk = g.Sum(pd => pd.Milk), Skins = g.Sum(pd => pd.Skins) }).FirstOrDefault();
+            var totals = db.ProduceDays.Where(pd => (pd.DayNumber <= dayNumber))
+                .GroupBy(pd => 1).Select(g => new { Milk = g.Sum(pd => pd.Milk), Skins = g.Sum(pd => pd.Skins) }).FirstOrDefault();
             return totals == null ? (0, 0) : (totals.Milk, totals.Skins);
         }
     }

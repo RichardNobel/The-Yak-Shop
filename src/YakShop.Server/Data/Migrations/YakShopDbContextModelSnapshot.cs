@@ -88,6 +88,9 @@ namespace YakShop.Server.Data.Migrations
                     b.Property<Guid>("CustomerId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int>("DayNumber")
+                        .HasColumnType("int");
+
                     b.Property<int>("Milk")
                         .HasColumnType("int");
 

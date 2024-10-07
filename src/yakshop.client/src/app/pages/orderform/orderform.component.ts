@@ -51,7 +51,7 @@ export class OrderFormComponent implements OnInit {
 
   onSubmit() {
     const order = new CustomerOrder(this.customerName.value!, this.milkQuantity.value!, this.skinsQuantity.value!);
-    this.http.post<CustomerOrder>('/yak-shop/order/0', order).subscribe({
+    this.http.post<CustomerOrder>('/yak-shop/order/1', order).subscribe({
       next: (result) => {
         this.router.navigate(['order-thankyou']);
       },

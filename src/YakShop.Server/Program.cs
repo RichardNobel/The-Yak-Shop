@@ -107,29 +107,7 @@ app.MapPost(
     .Produces(StatusCodes.Status205ResetContent);
 
 // POST /yak-shop/order/T
-app.MapPost(
-        "/yak-shop/order/{daysAfterInit}",
-        (
-            [FromRoute] int daysAfterInit,
-            [FromBody] CustomerOrder customerOrder,
-            [FromServices] IOrderRepository orderRepo
-        ) =>
-        {
-            // TODO: Check stock amounts for milk & skins.
-            customerOrder.Order.Customer = new Customer(customerOrder.CustomerName);
-            orderRepo.CreateOrder(customerOrder.Order);
-            orderRepo.Save();
-
-            // 201 - The order was placed successfully.
-            return TypedResults.Created();
-
-            // TODO: 206 - Can only deliver part of total order.
-            //return TypedResults.StatusCode(StatusCodes.Status206PartialContent);
-
-            // TODO: 404 - The full order is not in stock.
-            //return TypedResults.NotFound("Unfortunately there is insufficient stock for the full order.");
-        }
-    )
+app.MapPost("/yak-shop/order/{daysAfterInit}", HandleOrder)
     .WithName("PlaceOrder")
     .WithDescription(
         "Where [daysAfterInit] or T is the day the customer orders, this means that day T has _not_ elapsed."
@@ -160,6 +138,8 @@ void ConfigureServices(IServiceCollection services, ConfigurationManager config)
 #endif
 
     services.AddScoped<DailyHerdStatsUpdateService>();
+    services.AddScoped<StockQuantitiesCalculatorService>();
+
     services.AddScoped<IHerdRepository, HerdRepository>();
     services.AddScoped<IOrderRepository, OrderRepository>();
     services.AddScoped<IProduceDayRepository, ProduceDayRepository>();
@@ -191,4 +171,50 @@ void CreateDbIfNotExists(WebApplication app)
     {
         logger.LogError(ex, "An error occurred creating the DB.");
     }
+}
+
+IResult HandleOrder([FromRoute] int daysAfterInit,
+            [FromBody] CustomerOrder customerOrder,
+            [FromServices] StockQuantitiesCalculatorService stockCalc,
+            [FromServices] IOrderRepository orderRepo)
+{
+    var order = customerOrder.Order;
+    order.DayNumber = daysAfterInit;
+    order.Customer = new Customer(customerOrder.CustomerName);
+
+    // Check stock amounts for milk & skins.
+    var (milk, skins) = stockCalc.CalculateForDay(daysAfterInit);
+
+    if (order.Milk > milk && order.Skins > skins)
+    {
+        // 404 - The full order is not in stock.
+        return TypedResults.NotFound("Unfortunately there is insufficient stock for the full order.");
+    }
+
+    if (order.Milk > milk || order.Skins > skins)
+    {
+        if (order.Milk > milk)
+        {
+            order.Milk = 0;
+        }
+        else if (order.Skins > skins)
+        {
+            order.Skins = 0;
+        }
+
+        SaveOrder(orderRepo, order);
+        // 206 - Can only deliver part of total order.
+        return TypedResults.StatusCode(StatusCodes.Status206PartialContent);
+    }
+
+    SaveOrder(orderRepo, order);
+
+    // 201 - The order was placed successfully.
+    return TypedResults.Created();
+}
+
+static void SaveOrder(IOrderRepository orderRepo, Order order)
+{
+    orderRepo.CreateOrder(order);
+    orderRepo.Save();
 }

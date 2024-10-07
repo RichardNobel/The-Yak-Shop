@@ -10,6 +10,13 @@ namespace YakShop.Server.Data.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.AddColumn<int>(
+                name: "DayNumber",
+                table: "Orders",
+                type: "int",
+                nullable: false,
+                defaultValue: 0);
+
             migrationBuilder.CreateTable(
                 name: "ProduceDays",
                 columns: table => new
@@ -30,6 +37,10 @@ namespace YakShop.Server.Data.Migrations
         {
             migrationBuilder.DropTable(
                 name: "ProduceDays");
+
+            migrationBuilder.DropColumn(
+                name: "DayNumber",
+                table: "Orders");
         }
     }
 }

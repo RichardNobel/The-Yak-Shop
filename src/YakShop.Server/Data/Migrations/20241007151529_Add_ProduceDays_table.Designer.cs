@@ -12,7 +12,7 @@ using YakShop.Server.Data;
 namespace YakShop.Server.Data.Migrations
 {
     [DbContext(typeof(YakShopDbContext))]
-    [Migration("20241007144205_Add_ProduceDays_table")]
+    [Migration("20241007151529_Add_ProduceDays_table")]
     partial class Add_ProduceDays_table
     {
         /// <inheritdoc />
@@ -90,6 +90,9 @@ namespace YakShop.Server.Data.Migrations
 
                     b.Property<Guid>("CustomerId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("DayNumber")
+                        .HasColumnType("int");
 
                     b.Property<int>("Milk")
                         .HasColumnType("int");
