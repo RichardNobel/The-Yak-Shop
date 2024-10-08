@@ -7,9 +7,13 @@ namespace YakShop.Server.Data.Repositories
     public interface IProduceDayRepository : IBaseRepository<ProduceDay>
     {
         void Add(ProduceDay produceDay);
+
         void DeleteAll();
+
         ProduceDay? Get(int dayNumber);
+
         ProduceDay GetLatest();
+
         Task<(decimal milk, int skins)> GetTotalAmountsUntilDayAsync(int dayNumber);
     }
 

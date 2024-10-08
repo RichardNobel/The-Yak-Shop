@@ -7,8 +7,11 @@ namespace YakShop.Server.Data.Repositories
     public interface IHerdRepository : IBaseRepository<Herd>
     {
         void CreateHerd(Herd herd);
+
         Herd GetHerd();
+
         void DeleteHerd();
+
         void UpdateMember(HerdMember herdMember);
     }
 
@@ -54,7 +57,7 @@ namespace YakShop.Server.Data.Repositories
 
             entity.Age = herdMember.Age;
             entity.AgeLastShaved = herdMember.AgeLastShaved;
-            
+
             db.HerdMembers.Update(entity);
             Save();
         }

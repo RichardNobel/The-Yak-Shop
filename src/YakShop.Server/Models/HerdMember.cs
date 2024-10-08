@@ -10,7 +10,6 @@ namespace YakShop.Server.Models
         decimal AgeNextShave { get; set; }
         string Name { get; init; }
         string Sex { get; init; }
-
     }
 
     // TODO: Add a form of validation (e.g. for the Range attribute on the Age property).

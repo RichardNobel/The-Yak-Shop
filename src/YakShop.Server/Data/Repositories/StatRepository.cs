@@ -6,6 +6,7 @@ namespace YakShop.Server.Data.Repositories
     internal interface IStatRepository : IBaseRepository<Stat>
     {
         string GetValue(string key);
+
         void SetValue(string key, string value);
     }
 
