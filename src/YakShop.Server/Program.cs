@@ -103,7 +103,7 @@ app.MapPost(
 app.MapPost("/yak-shop/order/{daysAfterInit}", HandleOrderAsync)
     .WithName("PlaceOrder")
     .WithDescription(
-        "Where [daysAfterInit] or T is the day the customer orders, this means that day T has _not_ elapsed."
+        "Where [daysAfterInit] or T is the day the customer orders, this means that day T has not elapsed."
     )
     .WithOpenApi();
 
