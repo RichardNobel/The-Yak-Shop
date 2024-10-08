@@ -17,12 +17,19 @@ namespace YakShop.Server.Data.Migrations
                 nullable: false,
                 defaultValue: 0);
 
+            migrationBuilder.AddColumn<decimal>(
+                name: "AgeNextShave",
+                table: "HerdMembers",
+                type: "decimal(4,2)",
+                nullable: false,
+                defaultValue: 0m)
+                .Annotation("Relational:ColumnOrder", 6);
+
             migrationBuilder.CreateTable(
                 name: "ProduceDays",
                 columns: table => new
                 {
-                    DayNumber = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    DayNumber = table.Column<int>(type: "int", nullable: false),
                     Milk = table.Column<decimal>(type: "decimal(4,2)", nullable: false),
                     Skins = table.Column<int>(type: "int", nullable: false)
                 },
@@ -41,6 +48,10 @@ namespace YakShop.Server.Data.Migrations
             migrationBuilder.DropColumn(
                 name: "DayNumber",
                 table: "Orders");
+
+            migrationBuilder.DropColumn(
+                name: "AgeNextShave",
+                table: "HerdMembers");
         }
     }
 }

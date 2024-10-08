@@ -12,7 +12,7 @@ using YakShop.Server.Data;
 namespace YakShop.Server.Data.Migrations
 {
     [DbContext(typeof(YakShopDbContext))]
-    [Migration("20241007151529_Add_ProduceDays_table")]
+    [Migration("20241007233032_Add_ProduceDays_table")]
     partial class Add_ProduceDays_table
     {
         /// <inheritdoc />
@@ -59,6 +59,10 @@ namespace YakShop.Server.Data.Migrations
                     b.Property<decimal>("AgeLastShaved")
                         .HasColumnType("decimal(4,2)")
                         .HasColumnOrder(5);
+
+                    b.Property<decimal>("AgeNextShave")
+                        .HasColumnType("decimal(4,2)")
+                        .HasColumnOrder(6);
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -115,10 +119,7 @@ namespace YakShop.Server.Data.Migrations
             modelBuilder.Entity("YakShop.Server.Data.Entities.ProduceDayEntity", b =>
                 {
                     b.Property<int>("DayNumber")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DayNumber"));
 
                     b.Property<decimal>("Milk")
                         .HasColumnType("decimal(4,2)");

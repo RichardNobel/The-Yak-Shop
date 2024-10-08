@@ -14,7 +14,6 @@ var logger = app.Services.GetRequiredService<ILogger<Program>>();
 
 CreateDbIfNotExists(app);
 
-// TODO: Enable timer service
 var timerService = app.Services.GetRequiredService<TimeLapseSimulationHostedService>();
 timerService.IsEnabled = true;
 
@@ -41,7 +40,7 @@ app.MapGet(
         ([FromRoute] int daysAfterInit) =>
         {
             // TODO: Return herd view.
-            return TypedResults.Ok();
+            return TypedResults.NotFound("Not implemented.");
         }
     )
     .WithName("GetHerdInfo")
@@ -50,10 +49,12 @@ app.MapGet(
 
 // GET /yak-shop/stock/T
 app.MapGet(
-        "/yak-shop/stock/{daysAfterInit}",
-        ([FromRoute] int daysAfterInit) =>
+        "/yak-shop/stock/{daysAfterInit}", async
+        ([FromRoute] int daysAfterInit,
+         [FromServices] StockQuantitiesCalculatorService stockCalc
+        ) =>
         {
-            // TODO: Return stock view.
+            await stockCalc.CalculateForDayAsync(daysAfterInit);
             return TypedResults.Ok();
         }
     )
@@ -69,6 +70,7 @@ app.MapPost(
          [FromServices] IStatRepository statRepo,
          [FromServices] IProduceDayRepository produceDayRepo) =>
         {
+            timerService.IsEnabled = false;
             herdRepo.DeleteHerd();
             herdRepo.CreateHerd(herd);
             int numberOfRecordsCreated = herdRepo.Save();
@@ -83,7 +85,9 @@ app.MapPost(
             var initialStockSkins = herd.Members.Length;
             var initialStockMilk = YakProduceCalculator.TotalHerdLitersOfMilkToday(herd.Members);
             produceDayRepo.Add(new ProduceDay(0, initialStockMilk, initialStockSkins));
+            produceDayRepo.Save();
 
+            timerService.IsEnabled = true;
             // 205 - Webshop is reset to the initial state.
             return TypedResults.StatusCode(StatusCodes.Status205ResetContent);
         }
@@ -205,7 +209,7 @@ async Task<IResult> HandleOrderAsync([FromRoute] int daysAfterInit,
 
         SaveOrder(orderRepo, order);
         // 206 - Can only deliver part of total order.
-        return TypedResults.StatusCode(StatusCodes.Status206PartialContent);
+        return TypedResults.Json(order, statusCode: StatusCodes.Status206PartialContent);
     }
 
     SaveOrder(orderRepo, order);

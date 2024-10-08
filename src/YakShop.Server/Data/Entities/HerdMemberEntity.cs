@@ -14,7 +14,7 @@ namespace YakShop.Server.Data.Entities
     [Index(nameof(Age))]
     public record HerdMemberEntity : IHerdMember
     {
-        public HerdMemberEntity(string name, decimal age, string sex, decimal ageLastShaved)
+        public HerdMemberEntity(string name, decimal age, string sex, decimal ageLastShaved, decimal ageNextShave)
         {
             if (
                 !sex.Equals("MALE", StringComparison.InvariantCultureIgnoreCase)
@@ -29,6 +29,7 @@ namespace YakShop.Server.Data.Entities
 
             Age = age;
             AgeLastShaved = ageLastShaved;
+            AgeNextShave = ageNextShave;
             Name = name;
             Sex = sex;
         }
@@ -39,11 +40,15 @@ namespace YakShop.Server.Data.Entities
 
         [Column(Order = 4)]
         [Required, Range(0, 10, ErrorMessage = $"{nameof(Age)} must be a positive value between 0 and 10.")]
-        public decimal Age { get; init; }
+        public decimal Age { get; set; }
 
         [Column(Order = 5)]
         [Required, Range(0, 10, ErrorMessage = $"{nameof(AgeLastShaved)} must be a positive value between 0 and 10.")]
-        public decimal AgeLastShaved { get; init; }
+        public decimal AgeLastShaved { get; set; }
+
+        [Column(Order = 6)]
+        [Required, Range(1, 10, ErrorMessage = $"{nameof(AgeNextShave)} must be a positive value between 1 and 10.")]
+        public decimal AgeNextShave { get; set; }
 
         [Required]
         [Column(Order = 2)]

@@ -26,9 +26,9 @@ namespace YakShop.Server.Data
 
             var herdMembers = new HerdMemberEntity[]
             {
-                new("Yak-1", age: 4, "FEMALE", ageLastShaved: 4),
-                new("Yak-2", age: 8, "FEMALE", ageLastShaved: 8),
-                new("Yak-3", age: (decimal)9.5, "FEMALE", ageLastShaved: (decimal)9.5),
+                new("Yak-1", age: (decimal) 4.10, "FEMALE", ageLastShaved: 4, ageNextShave: (decimal) 4.12),
+                new("Yak-2", age: (decimal) 8.14, "FEMALE", ageLastShaved: 8, ageNextShave: (decimal) 8.16),
+                new("Yak-3", age: (decimal) 9.5, "FEMALE", ageLastShaved: (decimal)9.5, ageNextShave: (decimal) 10.3),
             };
 
             foreach (HerdMemberEntity hm in herdMembers)

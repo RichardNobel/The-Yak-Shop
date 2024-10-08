@@ -19,8 +19,7 @@ namespace YakShop.Server.Data.Repositories
     {
         public void Add(ProduceDay produceDay)
         {
-            db.ProduceDays.Add(new ProduceDayEntity(produceDay.Milk, produceDay.Skins));
-            Save();
+            db.ProduceDays.Add(new ProduceDayEntity(produceDay.DayNumber, produceDay.Milk, produceDay.Skins));
         }
 
         public void DeleteAll()

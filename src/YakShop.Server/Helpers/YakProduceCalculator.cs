@@ -14,20 +14,20 @@ namespace YakShop.Server.Helpers
             return 50 - (ageInDays * (decimal)0.03);
         }
 
-        public static decimal NextShaveDay(decimal ageInDays, decimal ageLastShaved)
+        public static decimal NextShaveDay(decimal ageInDays)
         {
-            decimal nextShaveDay = (8 + (ageInDays * (decimal)0.01)) + ageLastShaved;
-            return Math.Floor(nextShaveDay);
+            decimal nextShaveDay = (8 + (ageInDays * (decimal)0.01)) + ageInDays;
+            return Math.Floor(nextShaveDay) / 100;
         }
 
-        public static bool IsEligibleToBeShaven(decimal ageInDays, decimal ageLastShaved)
+        public static bool IsEligibleToBeShaved(decimal ageInDays, decimal ageNextShaveInDays)
         {
             if (ageInDays < 100 || ageInDays > 999)
             {
                 return false;
             }
 
-            return ageInDays >= NextShaveDay(ageInDays, ageLastShaved);
+            return ageInDays == ageNextShaveInDays;
         }
 
         public static decimal TotalHerdLitersOfMilkToday(IEnumerable<IHerdMember> herdMembers)

@@ -4,8 +4,9 @@ namespace YakShop.Server.Data.Entities
 {
     public record ProduceDayEntity
     {
-        public ProduceDayEntity(decimal milk, int skins)
+        public ProduceDayEntity(int dayNumber, decimal milk, int skins)
         {
+            DayNumber = dayNumber;
             Milk = milk;
             Skins = skins;
         }

@@ -17,24 +17,22 @@ namespace YakShop.Tests
         }
 
         [Theory]
-        [InlineData(412, 400, 412)]
-        [InlineData(513, 500, 513)]
-        [InlineData(715, 700, 715)]
-        public void NextShaveDay_ShouldReturnCorrectShaveDay(decimal ageInDays, decimal ageLastShaved, decimal expectedShaveDay)
+        [InlineData(400, 412)]
+        [InlineData(500, 513)]
+        [InlineData(700, 715)]
+        public void NextShaveDay_ShouldReturnCorrectShaveDay(decimal ageInDays, decimal expectedShaveDay)
         {
-            var result = YakProduceCalculator.NextShaveDay(ageInDays, ageLastShaved);
-            Assert.Equal(expectedShaveDay, result);
+            var result = YakProduceCalculator.NextShaveDay(ageInDays);
+            Assert.Equal(expectedShaveDay, result * 100);
         }
 
         [Theory]
-        [InlineData(50, 0, false)]
-        [InlineData(412, 400, true)]
-        [InlineData(513, 500, true)]
-        [InlineData(916, 900, false)]
-        [InlineData(1000, 980, false)]
-        public void IsEligibleToBeShaven_ShouldReturnCorrectEligibility(decimal ageInDays, decimal ageLastShaved, bool expectedEligibility)
+        [InlineData(50, 85, false)]
+        [InlineData(513, 513, true)]
+        [InlineData(1000, 1018, false)]
+        public void IsEligibleToBeShaven_ShouldReturnCorrectEligibility(decimal ageInDays, decimal ageNextShaveInDays, bool expectedEligibility)
         {
-            var result = YakProduceCalculator.IsEligibleToBeShaven(ageInDays, ageLastShaved);
+            var result = YakProduceCalculator.IsEligibleToBeShaved(ageInDays, ageNextShaveInDays);
             Assert.Equal(expectedEligibility, result);
         }
 
@@ -43,9 +41,9 @@ namespace YakShop.Tests
         {
             var herdMembers = new List<IHerdMember>
             {
-                new HerdMember("Yak-1", 3, "FEMALE"),
-                new HerdMember("Yak-2", 5, "FEMALE"),
-                new HerdMember("Yak-3", 8, "MALE")
+                new HerdMember(Guid.Empty, "Yak-1", 3, "FEMALE", 3, (decimal) 3.11),
+                new HerdMember(Guid.Empty, "Yak-2", 5, "FEMALE", 5, (decimal) 5.13),
+                new HerdMember(Guid.Empty, "Yak-3", 8, "MALE", 8, (decimal) 8.16)
             };
 
             var result = YakProduceCalculator.TotalHerdLitersOfMilkToday(herdMembers);

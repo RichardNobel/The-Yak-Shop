@@ -24,6 +24,7 @@ namespace YakShop.Server.Data
                 builder.ToTable(nameof(HerdMembers));
                 builder.Property(hm => hm.Age).HasColumnType("decimal(4,2)");
                 builder.Property(hm => hm.AgeLastShaved).HasColumnType("decimal(4,2)");
+                builder.Property(hm => hm.AgeNextShave).HasColumnType("decimal(4,2)");
             });
 
             modelBuilder.Entity<OrderEntity>(builder =>
@@ -36,6 +37,7 @@ namespace YakShop.Server.Data
             {
                 builder.ToTable(nameof(ProduceDays));
                 builder.HasKey(pd => pd.DayNumber);
+                builder.Property(pd => pd.DayNumber).ValueGeneratedNever();
                 builder.Property(pd => pd.Milk).HasColumnType("decimal(4,2)");
             });
 

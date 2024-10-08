@@ -27,7 +27,7 @@ describe('OrderformComponent', () => {
   });
 
   it('should retrieve stock information from the server', () => {
-    const mockStockInfo: StockInfo = { milk: 99.67, skins: 3 };
+    const mockStockInfo: StockInfo = { dayNumber: 1, milk: 99.67, skins: 3 };
 
     component.ngOnInit();
 

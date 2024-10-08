@@ -57,6 +57,10 @@ namespace YakShop.Server.Data.Migrations
                         .HasColumnType("decimal(4,2)")
                         .HasColumnOrder(5);
 
+                    b.Property<decimal>("AgeNextShave")
+                        .HasColumnType("decimal(4,2)")
+                        .HasColumnOrder(6);
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)")
@@ -112,10 +116,7 @@ namespace YakShop.Server.Data.Migrations
             modelBuilder.Entity("YakShop.Server.Data.Entities.ProduceDayEntity", b =>
                 {
                     b.Property<int>("DayNumber")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DayNumber"));
 
                     b.Property<decimal>("Milk")
                         .HasColumnType("decimal(4,2)");
