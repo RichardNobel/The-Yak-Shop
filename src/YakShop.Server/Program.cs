@@ -54,8 +54,8 @@ app.MapGet(
          [FromServices] StockQuantitiesCalculatorService stockCalc
         ) =>
         {
-            await stockCalc.CalculateForDayAsync(daysAfterInit);
-            return TypedResults.Ok();
+            var stock = await stockCalc.CalculateForDayAsync(daysAfterInit);
+            return TypedResults.Ok(new StockInfo(daysAfterInit, stock.milk, stock.skins));
         }
     )
     .WithName("GetStockInfo")

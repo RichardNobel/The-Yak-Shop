@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using YakShop.Server.Data.Entities;
+using YakShop.Server.Helpers;
 using YakShop.Server.Models;
 
 namespace YakShop.Server.Data.Repositories
@@ -38,7 +39,8 @@ namespace YakShop.Server.Data.Repositories
         {
             foreach (var member in herd.Members)
             {
-                db.HerdMembers.Add(new HerdMemberEntity(member.Name, member.Age, member.Sex, ageLastShaved: member.Age, ageNextShave: member.Age));
+                var ageNextShave = YakProduceCalculator.NextShaveDay(member.AgeInDays);
+                db.HerdMembers.Add(new HerdMemberEntity(member.Name, member.Age, member.Sex, ageLastShaved: member.Age, ageNextShave));
             }
         }
 
@@ -57,6 +59,7 @@ namespace YakShop.Server.Data.Repositories
 
             entity.Age = herdMember.Age;
             entity.AgeLastShaved = herdMember.AgeLastShaved;
+            entity.AgeNextShave = herdMember.AgeNextShave;
 
             db.HerdMembers.Update(entity);
             Save();
