@@ -2,7 +2,7 @@
 {
     public class TimeLapseSimulationHostedService : BackgroundService
     {
-        private readonly TimeSpan _period = TimeSpan.FromSeconds(10);
+        private readonly TimeSpan _period = TimeSpan.FromSeconds(5);
         private readonly ILogger<TimeLapseSimulationHostedService> _logger;
         private readonly IServiceScopeFactory _factory;
         private int _executionCount = 0;
