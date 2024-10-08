@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 
+import * as initjs from '../../../assets/js/ecommerce';
+
 @Component({
   selector: 'app-homepage',
   templateUrl: './homepage.component.html',
@@ -10,6 +12,7 @@ export class HomepageComponent implements OnInit {
   constructor() { }
 
   ngOnInit() {
+    initjs.initSwiper();
   }
 
 }
